@@ -92,6 +92,12 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 
 			if (strpos($path, $replacement->search) !== false)
 			{
+				if (strpos($replacement->replace, $replacement->search) !== false)
+				{
+					// Guard against recursive loops
+					continue;
+				}
+
 				if ($end === null)
 				{
 					$path = str_replace($replacement->search, $replacement->replace, $path);
