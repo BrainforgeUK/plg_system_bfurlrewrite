@@ -41,7 +41,7 @@
                                     type="text"
                                     label="PLG_SYSTEM_BFURLREWRITE_SEARCH_LABEL"
                                     description="PLG_SYSTEM_BFURLREWRITE_SEARCH_DESC"
-                                    hint="/part1/part2/part3/part4/"
+                                    hint="/part1/part2/*/part4/"
                                     required="true"
                             />
 
@@ -69,6 +69,18 @@
                         </fieldset>
                     </form>
                 </field>
+            </fieldset>
+
+            <fieldset
+                    name="help"
+                    label="PLG_SYSTEM_BFURLREWRITE_HELP_LABEL"
+            >
+                <field
+                        name="note"
+                        type="textarea"
+                        label="PLG_SYSTEM_BFURLREWRITE_NOTE_LABEL"
+                        hint="PLG_SYSTEM_BFURLREWRITE_NOTE_HINT"
+                />
             </fieldset>
         </fields>
     </config>

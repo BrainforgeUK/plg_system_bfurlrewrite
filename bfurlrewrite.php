@@ -17,6 +17,15 @@ use Joomla\CMS\Uri\Uri;
 
 class plgSystemBfurlrewrite extends CMSPlugin {
 	protected $app;
+	protected static $instance;
+
+	/*
+	 */
+	public function __construct(&$subject, $config = array()) {
+		parent::__construct($subject, $config);
+
+		self::$instance = $this;
+	}
 
 	/**
 	 */
@@ -30,7 +39,7 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 		$uri = Uri::getInstance();
 		$path = $uri->getPath();
 
-		if ($this->replace($path))
+		if ($this->_replace($path))
 		{
 			$this->app->redirect($path);
 		}
@@ -66,7 +75,7 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 				continue;
 			}
 
-			$this->replace($bodyPart, $end+1);
+			$this->_replace($bodyPart, $end+1);
 		}
 		unset($part);
 
@@ -75,7 +84,7 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 
 	/*
 	 */
-	protected function replace(&$path, $end=null)
+	protected function _replace(&$path, $end=null)
 	{
 		$replacements = $this->params->get('replacements');
 		if (empty($replacements))
@@ -90,27 +99,51 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 				continue;
 			}
 
-			if (strpos($path, $replacement->search) !== false)
+			if (strpos($replacement->search, '/*/') !== false)
 			{
-				if (strpos($replacement->replace, $replacement->search) !== false)
+				$search = "\001" . str_replace('/*/', '/[^/]+/', $replacement->search) . "\001";
+
+				if (!preg_match($search, $path))
 				{
-					// Guard against recursive loops
 					continue;
 				}
 
-				if ($end === null)
+				$replace = 'preg_replace';
+			}
+			else
+			{
+				if (strpos($path, $replacement->search) === false)
 				{
-					$path = str_replace($replacement->search, $replacement->replace, $path);
-					return true;
+					continue;
 				}
 
-				$oldURL = substr($path, 0, $end);
-				$newURL = str_replace($replacement->search, $replacement->replace, $oldURL);
-				$path = $newURL . substr($path, $end);
+				$search = $replacement->search;
+
+				$replace = 'str_replace';
+			}
+
+			if ($end === null)
+			{
+				$path = $replace($search, $replacement->replace, $path);
+
 				return true;
 			}
+
+			$oldURL = substr($path, 0, $end);
+			$newURL = $replace($replacement->search, $replacement->replace, $oldURL);
+			$path   = $newURL . substr($path, $end);
+
+			return true;
 		}
 
 		return false;
+	}
+
+	/*
+	 */
+	public static function replace($path)
+	{
+		self::$instance->_replace($path);
+		return $path;
 	}
 }
