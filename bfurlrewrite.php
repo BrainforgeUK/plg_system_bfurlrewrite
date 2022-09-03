@@ -56,10 +56,17 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 			return;
 		}
 
+		$replaced = false;
+
 		$body = explode('href=', $app->getBody());
 
 		foreach($body as &$bodyPart)
 		{
+			if (empty($bodyPart))
+			{
+				continue;
+			}
+
 			switch($bodyPart[0])
 			{
 				case '"':
@@ -75,11 +82,14 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 				continue;
 			}
 
-			$this->_replace($bodyPart, $end+1);
+			$replaced |= $this->_replace($bodyPart, $end+1);
 		}
 		unset($part);
 
-		$app->setBody(implode('href=', $body));
+		if ($replaced)
+		{
+			$app->setBody(implode('href=', $body));
+		}
 	}
 
 	/*
