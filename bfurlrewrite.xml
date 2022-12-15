@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.9" type="plugin" group="system" method="upgrade">
     <name>PLG_SYSTEM_BFURLREWRITE</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <creationDate>August 2020</creationDate>
     <author>Jonathan Brain</author>
     <authorEmail>brainforge@btinternet.com</authorEmail>

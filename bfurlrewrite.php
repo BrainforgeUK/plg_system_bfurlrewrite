@@ -140,7 +140,7 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 			}
 
 			$oldURL = substr($path, 0, $end);
-			$newURL = $replace($replacement->search, $replacement->replace, $oldURL);
+			$newURL = $replace($search, $replacement->replace, $oldURL);
 			$path   = $newURL . substr($path, $end);
 
 			return true;
