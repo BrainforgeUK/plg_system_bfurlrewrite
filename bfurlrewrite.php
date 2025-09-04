@@ -3,7 +3,7 @@
  * @package   System plugin for for URL rewriting
  * @version   0.0.1
  * @author    https://www.brainforge.co.uk
- * @copyright Copyright (C) 2022 Jonathan Brain. All rights reserved.
+ * @copyright Copyright (C) 2022-2025 Jonathan Brain. All rights reserved.
  * @license   GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
@@ -11,13 +11,13 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Uri\Uri;
 
 class plgSystemBfurlrewrite extends CMSPlugin {
 	protected $app;
 	protected static $instance;
+	protected $replacements;
 
 	/*
 	 */
@@ -25,6 +25,8 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 		parent::__construct($subject, $config);
 
 		self::$instance = $this;
+
+		$this->replacements = $this->params->get('replacements');
 	}
 
 	/**
@@ -51,10 +53,9 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 	{
 		$app = Factory::getApplication();
 
-		if (!$app->isClient('site'))
-		{
-			return;
-		}
+		if (!$app->isClient('site')) return;
+
+		if (empty($this->replacements)) return;
 
 		$replaced = false;
 
@@ -62,10 +63,7 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 
 		foreach($body as &$bodyPart)
 		{
-			if (empty($bodyPart))
-			{
-				continue;
-			}
+			if (empty($bodyPart)) continue;
 
 			switch($bodyPart[0])
 			{
@@ -77,10 +75,7 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 			}
 
 			$end = strpos($bodyPart, $bodyPart[0], 1);
-			if ($end === false)
-			{
-				continue;
-			}
+			if ($end === false) continue;
 
 			$replaced |= $this->_replace($bodyPart, $end+1);
 		}
@@ -96,36 +91,21 @@ class plgSystemBfurlrewrite extends CMSPlugin {
 	 */
 	protected function _replace(&$path, $end=null)
 	{
-		$replacements = $this->params->get('replacements');
-		if (empty($replacements))
+		foreach((array) $this->replacements as $replacement)
 		{
-			return false;
-		}
-
-		foreach((array) $replacements as $replacement)
-		{
-			if (empty($replacement->state))
-			{
-				continue;
-			}
+			if (empty($replacement->state)) continue;
 
 			if (strpos($replacement->search, '/*/') !== false)
 			{
 				$search = "\001" . str_replace('/*/', '/[^/]+/', $replacement->search) . "\001";
 
-				if (!preg_match($search, $path))
-				{
-					continue;
-				}
+				if (!preg_match($search, $path)) continue;
 
 				$replace = 'preg_replace';
 			}
 			else
 			{
-				if (strpos($path, $replacement->search) === false)
-				{
-					continue;
-				}
+				if (strpos($path, $replacement->search) === false) continue;
 
 				$search = $replacement->search;
 
